@@ -541,11 +541,20 @@ async function clearAllData() {
 // FIREBASE ĐỒNG BỘ
 // ============================================
 
+const DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyBv5MG1QVuxIQE2znyvK28t_w6JUC8YbSc",
+    authDomain: "bien-bao-giao-thong.firebaseapp.com",
+    projectId: "bien-bao-giao-thong",
+    storageBucket: "bien-bao-giao-thong.firebasestorage.app",
+    messagingSenderId: "739737134453",
+    appId: "1:739737134453:web:ebb5adfb879d27b4a2df3c"
+};
+
 async function loadFirebaseConfig() {
     try {
         const setting = await dbGet('settings', 'firebaseConfig');
-        return setting ? setting.value : null;
-    } catch (e) { return null; }
+        return setting ? setting.value : DEFAULT_FIREBASE_CONFIG;
+    } catch (e) { return DEFAULT_FIREBASE_CONFIG; }
 }
 
 async function saveFirebaseConfigToDB(config) {

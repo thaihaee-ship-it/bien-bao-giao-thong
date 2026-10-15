@@ -1,0 +1,18 @@
+{
+    "name": "Biển Báo Giao Thông",
+    "short_name": "Biển Báo GT",
+    "description": "App trắc nghiệm biển báo giao thông",
+    "start_url": ".",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#1565C0",
+    "theme_color": "#1565C0",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ]
+}

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1565C0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Biển Báo Giao Thông</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+
+    <header id="app-header">
+        <h1 id="header-title">Biển Báo GT</h1>
+    </header>
+
+    <main>
+        <!-- TRANG CHỦ -->
+        <section id="page-home" class="page active">
+            <div class="stats-cards">
+                <div class="stat-card" data-testid="stat-total">
+                    <span class="stat-number" id="stat-total">0</span>
+                    <span class="stat-label">Biển báo</span>
+                </div>
+                <div class="stat-card" data-testid="stat-correct">
+                    <span class="stat-number" id="stat-correct">0</span>
+                    <span class="stat-label">Trả lời đúng</span>
+                </div>
+                <div class="stat-card" data-testid="stat-wrong">
+                    <span class="stat-number" id="stat-wrong">0</span>
+                    <span class="stat-label">Trả lời sai</span>
+                </div>
+                <div class="stat-card" data-testid="stat-rate">
+                    <span class="stat-number" id="stat-rate">0%</span>
+                    <span class="stat-label">Tỷ lệ đúng</span>
+                </div>
+            </div>
+            <button id="btn-start-quiz" class="btn-primary btn-large" data-testid="btn-start-quiz" disabled>
+                Thêm biển báo trước
+            </button>
+        </section>
+
+        <!-- QUẢN LÝ BIỂN BÁO -->
+        <section id="page-manage" class="page">
+            <div id="signs-list"></div>
+            <button id="btn-add-sign" class="btn-fab" data-testid="btn-add-sign">+</button>
+        </section>
+
+        <!-- TRẮC NGHIỆM -->
+        <section id="page-quiz" class="page">
+            <div id="quiz-container">
+                <div id="quiz-progress">
+                    <span id="quiz-current">1</span> / <span id="quiz-total">10</span>
+                </div>
+                <div id="quiz-image-container">
+                    <img id="quiz-image" src="" alt="Biển báo">
+                </div>
+                <div id="quiz-answers" data-testid="quiz-answers"></div>
+                <button id="btn-next" class="btn-primary btn-block" data-testid="btn-next" style="display:none">
+                    Câu tiếp theo
+                </button>
+            </div>
+            <div id="quiz-result" style="display:none">
+                <h2>Kết quả</h2>
+                <div id="result-score" data-testid="result-score"></div>
+                <div class="result-buttons">
+                    <button id="btn-retry" class="btn-primary btn-block" data-testid="btn-retry">Làm lại</button>
+                    <button id="btn-review-wrong" class="btn-secondary btn-block" data-testid="btn-review-wrong" style="display:none">
+                        Ôn lại biển sai
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CÀI ĐẶT -->
+        <section id="page-settings" class="page">
+            <div class="settings-group">
+                <h3>Trắc nghiệm</h3>
+                <label>
+                    Số câu mỗi lượt:
+                    <select id="quiz-count" data-testid="select-quiz-count">
+                        <option value="5">5 câu</option>
+                        <option value="10" selected>10 câu</option>
+                        <option value="20">20 câu</option>
+                        <option value="0">Tất cả</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="settings-group">
+                <h3>Dữ liệu</h3>
+                <button id="btn-export" class="btn-secondary btn-block" data-testid="btn-export">
+                    Xuất dữ liệu (JSON + ảnh)
+                </button>
+                <button id="btn-import" class="btn-secondary btn-block" data-testid="btn-import">
+                    Nhập dữ liệu
+                </button>
+                <input type="file" id="file-import" accept=".json" style="display:none">
+                <button id="btn-clear-data" class="btn-danger btn-block" data-testid="btn-clear-data">
+                    Xóa tất cả dữ liệu
+                </button>
+            </div>
+
+            <div class="settings-group">
+                <h3>Firebase đồng bộ</h3>
+                <div id="firebase-status" data-testid="firebase-status">Chưa kết nối</div>
+                <button id="btn-firebase-config" class="btn-secondary btn-block" data-testid="btn-firebase-config">
+                    Cấu hình Firebase
+                </button>
+                <button id="btn-firebase-sync" class="btn-secondary btn-block" data-testid="btn-firebase-sync" disabled>
+                    Đồng bộ ngay
+                </button>
+            </div>
+
+            <div class="settings-group">
+                <h3>Thông tin</h3>
+                <p class="info-text">Phiên bản 1.0 — App trắc nghiệm biển báo giao thông</p>
+                <p class="info-text" id="data-size"></p>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL THÊM/SỬA BIỂN BÁO -->
+    <div id="modal-sign" class="modal-overlay" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Thêm biển báo</h2>
+                <button class="btn-close" data-testid="btn-modal-close" onclick="closeSignModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="image-preview" class="image-preview" data-testid="image-preview">
+                    <span>Chạm để chọn ảnh</span>
+                </div>
+                <input type="file" id="file-image" accept="image/*" capture="environment" style="display:none">
+
+                <div class="form-group">
+                    <label>Đáp án đúng:</label>
+                    <input type="text" id="input-correct" data-testid="input-correct" placeholder="VD: Cấm đi ngược chiều">
+                </div>
+                <div class="form-group">
+                    <label>Đáp án sai 1:</label>
+                    <input type="text" id="input-wrong1" data-testid="input-wrong1" placeholder="VD: Cấm dừng xe">
+                </div>
+                <div class="form-group">
+                    <label>Đáp án sai 2:</label>
+                    <input type="text" id="input-wrong2" data-testid="input-wrong2" placeholder="VD: Cấm quay đầu">
+                </div>
+                <div class="form-group">
+                    <label>Đáp án sai 3:</label>
+                    <input type="text" id="input-wrong3" data-testid="input-wrong3" placeholder="VD: Đường cấm">
+                </div>
+
+                <button id="btn-save-sign" class="btn-primary btn-block" data-testid="btn-save-sign">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CẤU HÌNH FIREBASE -->
+    <div id="modal-firebase" class="modal-overlay" style="display:none">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Cấu hình Firebase</h2>
+                <button class="btn-close" data-testid="btn-firebase-close" onclick="closeFirebaseModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="info-text" style="margin-bottom:12px">Dán đoạn config từ Firebase Console vào đây:</p>
+                <textarea id="firebase-config-input" data-testid="textarea-firebase-config" rows="8"
+                    placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea>
+                <button id="btn-firebase-save" class="btn-primary btn-block" data-testid="btn-firebase-save">
+                    Lưu cấu hình
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast" data-testid="toast"></div>
+
+    <!-- BOTTOM NAV -->
+    <nav id="bottom-nav">
+        <button class="nav-btn active" data-page="home" data-testid="nav-home">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Trang chủ</span>
+        </button>
+        <button class="nav-btn" data-page="manage" data-testid="nav-manage">
+            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+            <span>Biển báo</span>
+        </button>
+        <button class="nav-btn" data-page="quiz" data-testid="nav-quiz">
+            <svg viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+            <span>Trắc nghiệm</span>
+        </button>
+        <button class="nav-btn" data-page="settings" data-testid="nav-settings">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <span>Cài đặt</span>
+        </button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
